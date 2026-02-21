@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="ball_balancer_pre_urdf.SLDASM">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="0.005163 0.011005 0.0025372"
+        rpy="0 0 0" />
+      <mass
+        value="0.14776" />
+      <inertia
+        ixx="0.00015377"
+        ixy="1.0523E-07"
+        ixz="-2.6408E-06"
+        iyy="0.00029085"
+        iyz="-9.3549E-07"
+        izz="0.00014865" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_pre_urdf.SLDASM/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_pre_urdf.SLDASM/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="servo_arm_1_link">
+    <inertial>
+      <origin
+        xyz="3.4694E-18 0.013814 -6.9389E-17"
+        rpy="0 0 0" />
+      <mass
+        value="0.0030605" />
+      <inertia
+        ixx="7.5258E-07"
+        ixy="4.4668E-23"
+        ixz="1.1583E-22"
+        iyy="5.951E-08"
+        iyz="-1.1283E-21"
+        izz="7.0582E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_pre_urdf.SLDASM/meshes/servo_arm_1_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_pre_urdf.SLDASM/meshes/servo_arm_1_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="servo_arm_1_joint"
+    type="revolute">
+    <origin
+      xyz="-0.050096 0.041047 0.03755"
+      rpy="0 0 -2.0944" />
+    <parent
+      link="base_link" />
+    <child
+      link="servo_arm_1_link" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="0"
+      upper="1.57"
+      effort="1.9"
+      velocity="5.5" />
+  </joint>
+  <link
+    name="table_arm_1_link">
+    <inertial>
+      <origin
+        xyz="0.0020032 -0.030246 -1.0309E-08"
+        rpy="0 0 0" />
+      <mass
+        value="0.0025632" />
+      <inertia
+        ixx="2.5397E-07"
+        ixy="2.2471E-08"
+        ixz="1.2731E-13"
+        iyy="3.1017E-08"
+        iyz="-3.1325E-13"
+        izz="2.4742E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_pre_urdf.SLDASM/meshes/table_arm_1_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_pre_urdf.SLDASM/meshes/table_arm_1_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="table_arm_1_joint"
+    type="revolute">
+    <origin
+      xyz="0.00375 0.039365 0"
+      rpy="-0.2618 0 0" />
+    <parent
+      link="servo_arm_1_link" />
+    <child
+      link="table_arm_1_link" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-1.57"
+      upper="0"
+      effort="1.9"
+      velocity="5.5" />
+  </joint>
+  <link
+    name="servo_arm_2_link">
+    <inertial>
+      <origin
+        xyz="1.7347E-18 0.013814 -6.9389E-17"
+        rpy="0 0 0" />
+      <mass
+        value="0.0030605" />
+      <inertia
+        ixx="7.5258E-07"
+        ixy="1.8463E-23"
+        ixz="2.092E-24"
+        iyy="5.951E-08"
+        iyz="-1.1914E-21"
+        izz="7.0582E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_pre_urdf.SLDASM/meshes/servo_arm_2_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_pre_urdf.SLDASM/meshes/servo_arm_2_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="servo_arm_2_joint"
+    type="revolute">
+    <origin
+      xyz="-0.0105 -0.063908 0.03755"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="servo_arm_2_link" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="0"
+      upper="1.57"
+      effort="1.9"
+      velocity="5.5" />
+  </joint>
+  <link
+    name="table_arm_2_link">
+    <inertial>
+      <origin
+        xyz="0.0020032 -0.030246 -1.1886E-08"
+        rpy="0 0 0" />
+      <mass
+        value="0.0025632" />
+      <inertia
+        ixx="2.5398E-07"
+        ixy="2.2472E-08"
+        ixz="3.5056E-14"
+        iyy="3.1017E-08"
+        iyz="-3.7374E-13"
+        izz="2.4742E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_pre_urdf.SLDASM/meshes/table_arm_2_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_pre_urdf.SLDASM/meshes/table_arm_2_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="table_arm_2_joint"
+    type="revolute">
+    <origin
+      xyz="0.00375 0.039365 0"
+      rpy="-0.2618 0 0" />
+    <parent
+      link="servo_arm_2_link" />
+    <child
+      link="table_arm_2_link" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-1.57"
+      upper="0"
+      effort="1.9"
+      velocity="5.5" />
+  </joint>
+  <link
+    name="servo_arm_3_link">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_pre_urdf.SLDASM/meshes/servo_arm_3_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_pre_urdf.SLDASM/meshes/servo_arm_3_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="servo_arm_3_joint"
+    type="revolute">
+    <origin
+      xyz="0.060596 0.022861 0.03755"
+      rpy="0 0 2.0944" />
+    <parent
+      link="base_link" />
+    <child
+      link="servo_arm_3_link" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="0"
+      upper="1.57"
+      effort="1.9"
+      velocity="5.5" />
+  </joint>
+  <link
+    name="table_arm_3_link">
+    <inertial>
+      <origin
+        xyz="0.0020032 -0.030246 -9.4976E-09"
+        rpy="0 0 0" />
+      <mass
+        value="0.0025632" />
+      <inertia
+        ixx="2.5398E-07"
+        ixy="2.2472E-08"
+        ixz="5.1147E-14"
+        iyy="3.1017E-08"
+        iyz="-3.0192E-13"
+        izz="2.4742E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_pre_urdf.SLDASM/meshes/table_arm_3_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_pre_urdf.SLDASM/meshes/table_arm_3_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="table_arm_3_joint"
+    type="revolute">
+    <origin
+      xyz="0.00375 0.039365 0"
+      rpy="-0.2618 0 0" />
+    <parent
+      link="servo_arm_3_link" />
+    <child
+      link="table_arm_3_link" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-1.57"
+      upper="0"
+      effort="1.9"
+      velocity="5.5" />
+  </joint>
+</robot>
