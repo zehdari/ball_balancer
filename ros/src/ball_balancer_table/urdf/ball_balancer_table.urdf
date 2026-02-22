@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="ball_balancer_table">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-3.06281976340791E-10 0.0024952689120884 6.22399215003891E-11"
+        rpy="0 0 0" />
+      <mass
+        value="0.113623772682042" />
+      <inertia
+        ixx="0.000203272394718795"
+        ixy="-4.39151056766037E-14"
+        ixz="-1.44707292868474E-13"
+        iyy="0.000406074363039218"
+        iyz="8.22732076088615E-15"
+        izz="0.000203272394445846" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_table/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_table/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="table_magnet_1_link">
+    <inertial>
+      <origin
+        xyz="3.06281971396066E-10 -0.0749999999377601 0.0019952689120884"
+        rpy="0 0 0" />
+      <mass
+        value="0.113623772682042" />
+      <inertia
+        ixx="0.000203272394718795"
+        ixy="1.44707292887861E-13"
+        ixz="4.39151056763551E-14"
+        iyy="0.000203272394445846"
+        iyz="8.22732076245507E-15"
+        izz="0.000406074363039218" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_table/meshes/table_magnet_1_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_table/meshes/table_magnet_1_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="table_magnet_1_joint"
+    type="fixed">
+    <origin
+      xyz="0 -0.075 0.0005"
+      rpy="0 0 3.1416" />
+    <parent
+      link="base_link" />
+    <child
+      link="table_magnet_1_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="table_magnet_2_link">
+    <inertial>
+      <origin
+        xyz="0.0649519055901152 0.0375000000622393 0.0019952689120884"
+        rpy="0 0 0" />
+      <mass
+        value="0.113623772682042" />
+      <inertia
+        ixx="0.000203272394718795"
+        ixy="1.44707292887861E-13"
+        ixz="4.39151056763551E-14"
+        iyy="0.000203272394445846"
+        iyz="8.22732076083948E-15"
+        izz="0.000406074363039218" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_table/meshes/table_magnet_2_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_table/meshes/table_magnet_2_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="table_magnet_2_joint"
+    type="fixed">
+    <origin
+      xyz="0.064952 0.0375 0.0005"
+      rpy="0 0 3.1416" />
+    <parent
+      link="base_link" />
+    <child
+      link="table_magnet_2_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="table_magnet_3_link">
+    <inertial>
+      <origin
+        xyz="-0.0649519049775508 0.0375000000622402 0.0019952689120884"
+        rpy="0 0 0" />
+      <mass
+        value="0.113623772682042" />
+      <inertia
+        ixx="0.000203272394718795"
+        ixy="1.44707292913711E-13"
+        ixz="4.39151056762542E-14"
+        iyy="0.000203272394445846"
+        iyz="8.22732076114623E-15"
+        izz="0.000406074363039218" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_table/meshes/table_magnet_3_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer_table/meshes/table_magnet_3_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="table_magnet_3_joint"
+    type="fixed">
+    <origin
+      xyz="-0.064952 0.0375 0.0005"
+      rpy="0 0 3.1416" />
+    <parent
+      link="base_link" />
+    <child
+      link="table_magnet_3_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+</robot>

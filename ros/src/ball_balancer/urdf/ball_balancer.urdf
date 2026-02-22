@@ -54,8 +54,8 @@
         value="0.00309980999161893" />
       <inertia
         ixx="7.53064525555482E-07"
-        ixy="1.4857314879423E-22"
-        ixz="2.83252122955222E-25"
+        ixy="1.48615920681683E-22"
+        ixz="2.83252122955225E-25"
         iyy="5.9755946353975E-08"
         iyz="-1.16769063089024E-21"
         izz="7.06064992829684E-07" />
@@ -98,7 +98,7 @@
       xyz="-1 0 0" />
     <limit
       lower="-1.57"
-      upper="0.0"
+      upper="0"
       effort="1.9"
       velocity="5.5" />
   </joint>
@@ -113,9 +113,9 @@
       <inertia
         ixx="2.5397647409349E-07"
         ixy="2.24719540974155E-08"
-        ixz="3.50562172637029E-14"
+        ixz="3.50562172645301E-14"
         iyy="3.10173137802653E-08"
-        iyz="-3.73742597126455E-13"
+        iyz="-3.73742597121492E-13"
         izz="2.47421754391359E-07" />
     </inertial>
     <visual>
@@ -161,6 +161,59 @@
       velocity="5.5" />
   </joint>
   <link
+    name="table_arm_1_ball_link">
+    <inertial>
+      <origin
+        xyz="-0.000746768348818531 0.0245456989225969 -1.18861463935249E-08"
+        rpy="0 0 0" />
+      <mass
+        value="0.00256322375311019" />
+      <inertia
+        ixx="2.5397647409349E-07"
+        ixy="2.24719540974154E-08"
+        ixz="3.50562172651882E-14"
+        iyy="3.10173137802652E-08"
+        iyz="-3.73742597138036E-13"
+        izz="2.47421754391359E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer/meshes/table_arm_1_ball_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer/meshes/table_arm_1_ball_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="table_arm_1_ball_joint"
+    type="fixed">
+    <origin
+      xyz="0.00275 -0.054791 0"
+      rpy="0 0 0" />
+    <parent
+      link="table_arm_1_link" />
+    <child
+      link="table_arm_1_ball_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
     name="servo_arm_2_link">
     <inertial>
       <origin
@@ -171,9 +224,9 @@
       <inertia
         ixx="7.53064525555482E-07"
         ixy="1.40620704134015E-22"
-        ixz="5.36212882715867E-24"
+        ixz="5.43142717868586E-24"
         iyy="5.9755946353975E-08"
-        iyz="-1.18109006899715E-21"
+        iyz="-1.18099829620115E-21"
         izz="7.06064992829683E-07" />
     </inertial>
     <visual>
@@ -214,7 +267,7 @@
       xyz="-1 0 0" />
     <limit
       lower="-1.57"
-      upper="0.0"
+      upper="0"
       effort="1.9"
       velocity="5.5" />
   </joint>
@@ -277,6 +330,59 @@
       velocity="5.5" />
   </joint>
   <link
+    name="table_arm_2_ball_link">
+    <inertial>
+      <origin
+        xyz="-0.000746776448721724 0.0245457080687627 -9.30981114422025E-09"
+        rpy="0 0 0" />
+      <mass
+        value="0.00256321394494201" />
+      <inertia
+        ixx="2.53975403411485E-07"
+        ixy="2.2471697435682E-08"
+        ixz="4.96634103249932E-14"
+        iyy="3.10172591631405E-08"
+        iyz="-2.96520786613035E-13"
+        izz="2.4742054926573E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer/meshes/table_arm_2_ball_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer/meshes/table_arm_2_ball_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="table_arm_2_ball_joint"
+    type="fixed">
+    <origin
+      xyz="0.00275 -0.054791 0"
+      rpy="0 0 0" />
+    <parent
+      link="table_arm_2_link" />
+    <child
+      link="table_arm_2_ball_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
     name="servo_arm_3_link">
     <inertial>
       <origin
@@ -330,7 +436,7 @@
       xyz="-1 0 0" />
     <limit
       lower="-1.57"
-      upper="0.0"
+      upper="0"
       effort="1.9"
       velocity="5.5" />
   </joint>
@@ -345,9 +451,9 @@
       <inertia
         ixx="2.53973519433809E-07"
         ixy="2.24713070970572E-08"
-        ixz="1.27314190261122E-13"
-        iyy="3.10171931225823E-08"
-        iyz="-3.13248110066188E-13"
+        ixz="1.27314190247887E-13"
+        iyy="3.10171931225822E-08"
+        iyz="-3.13248110057503E-13"
         izz="2.47418505658137E-07" />
     </inertial>
     <visual>
@@ -391,5 +497,58 @@
       upper="0"
       effort="1.9"
       velocity="5.5" />
+  </joint>
+  <link
+    name="table_arm_3_ball_link">
+    <inertial>
+      <origin
+        xyz="-0.000746788044454532 0.0245457257858631 -1.03093975578616E-08"
+        rpy="0 0 0" />
+      <mass
+        value="0.00256319746004798" />
+      <inertia
+        ixx="2.53973519433809E-07"
+        ixy="2.24713070970572E-08"
+        ixz="1.27314190251196E-13"
+        iyy="3.10171931225822E-08"
+        iyz="-3.13248110055848E-13"
+        izz="2.47418505658137E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer/meshes/table_arm_3_ball_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ball_balancer/meshes/table_arm_3_ball_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="table_arm_3_ball_joint"
+    type="fixed">
+    <origin
+      xyz="0.00275 -0.054791 0"
+      rpy="0 0 0" />
+    <parent
+      link="table_arm_3_link" />
+    <child
+      link="table_arm_3_ball_link" />
+    <axis
+      xyz="0 0 0" />
   </joint>
 </robot>
