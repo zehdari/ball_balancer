@@ -1,1 +1,0 @@
-/home/cameron/ball_balancer/ros/build/ball_balancer/ament_cmake_environment_hooks/local_setup.sh
