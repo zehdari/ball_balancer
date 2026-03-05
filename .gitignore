@@ -1,3 +1,5 @@
 ros/build/
 ros/install/
 ros/log/
+__pycache__/
+*.egg-info

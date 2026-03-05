@@ -1,0 +1,95 @@
+params:
+  seed: 42  # random seed for reproducibility - fine to change
+
+  env:
+    clip_observations: 5.0  # observation values are clamped to [-5, 5] - leave this alone
+    clip_actions: 1.0       # action values are clamped to [-1, 1] - leave this alone
+
+  # algo/model/network: defines the PPO algorithm and neural net architecture
+  # these names are rl_games identifiers - do not change them
+  algo:
+    name: a2c_continuous  # do not change
+
+  model:
+    name: continuous_a2c_logstd  # do not change
+
+  network:
+    name: actor_critic  # shared actor-critic network - do not change
+    separate: False     # actor and critic share weights - leave this alone
+
+    space:
+      continuous:
+        mu_activation: None   # no activation on policy mean output - leave this alone
+        sigma_activation: None
+        mu_init:
+          name: default
+        sigma_init:
+          name: const_initializer
+          val: 0          # initial log-std = 0 (std = 1) - leave this alone
+        fixed_sigma: True # sigma is learned but not state-dependent - leave this alone
+
+    mlp:
+      units: [128, 64, 32]  # hidden layer sizes - OK to experiment with (e.g. [256, 128, 64] for more capacity)
+      activation: elu       # activation function - elu works well, can try relu or tanh
+      d2rl: False           # D2RL skip connections - leave off
+      initializer:
+        name: default
+      regularizer:
+        name: None
+
+  load_checkpoint: False  # set to True to resume from a checkpoint
+  load_path: ''           # path to checkpoint .pth file if resuming
+
+  # config: main training hyperparameters
+  config:
+    name: ball_balance_rlgames  # run name, used for log folder - fine to change
+    env_name: rlgpu             # do not change
+    device: 'cuda:0'            # GPU to train on - change if using a different GPU
+    device_name: 'cuda:0'       # should match device
+    multi_gpu: False            # do not change unless you have multi-GPU setup
+    ppo: True                   # do not change
+    mixed_precision: False      # can enable for faster training on newer GPUs, may affect stability
+
+    normalize_input: True   # normalizes observations using running stats - keep True
+    normalize_value: True   # normalizes value estimates - keep True
+
+    num_actors: -1          # number of actors, -1 means use num_envs from train.py - leave this alone
+
+    reward_shaper:
+      scale_value: 0.1      # scales raw rewards before computing loss - leave this alone
+
+    normalize_advantage: True  # normalizes advantages per minibatch - keep True
+
+    # --- discount and GAE ---
+    gamma: 0.99   # discount factor - lower (e.g. 0.97) if episodes feel too long-horizon
+    tau: 0.95     # GAE lambda for advantage estimation - fine to leave as-is
+
+    # --- learning rate ---
+    learning_rate: 3e-4   # initial LR - safe range is 1e-4 to 1e-3. go lower if training is unstable
+    lr_schedule: adaptive # adjusts LR based on KL divergence - keep adaptive
+    kl_threshold: 0.008   # target KL for adaptive LR schedule - lower = more conservative updates
+
+    score_to_win: 20000   # early-stop if mean score hits this - effectively disabled at this value
+
+    # --- training length ---
+    max_epochs: 1000      # total training iterations - increase if policy hasn't converged
+
+    # --- checkpointing ---
+    save_best_after: 50   # dont save best checkpoint until after this many epochs
+    save_frequency: 25    # save a checkpoint every N epochs
+
+    # --- PPO loss ---
+    grad_norm: 1.0        # gradient clipping threshold - leave this alone
+    entropy_coef: 0.0     # entropy bonus - small value (e.g. 0.001) can help exploration if policy gets stuck
+    truncate_grads: True  # clips gradients by grad_norm - leave this alone
+    e_clip: 0.2           # PPO clip epsilon - standard value, leave this alone
+
+    # --- rollout and batch sizes ---
+    horizon_length: 16    # steps collected per env before each update - increase for smoother gradients
+    minibatch_size: 8192  # samples per gradient step - reduce if running out of GPU memory
+    mini_epochs: 8        # passes over the rollout buffer per update - leave this alone
+
+    critic_coef: 4        # weight of value loss relative to policy loss - leave this alone
+    clip_value: True      # clips value loss similar to PPO policy clip - leave this alone
+    seq_length: 4         # do not change
+    bounds_loss_coef: 0.0001  # penalizes actions near the action bounds - leave this alone

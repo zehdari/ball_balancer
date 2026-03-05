@@ -1,138 +1,147 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Merged URDF for Isaac Sim: tree + closed-loop constraints via <loop_joint>.
-     Robot base is fixed to world, table is a floating body, legs close to table magnets with spherical loop joints. -->
+<!--
+  Isaac-Sim-friendly URDF rebuilt from the NEW SolidWorks export, but with the OLD “merged” behavior:
+  - Adds a world link and fixes the robot base to world
+  - Keeps the table as a separate link (child of base)
+  - Replaces Ball_1/2/3 mesh links with massless “ball frame” links at the same joint frames (no mesh)
+  - Makes magnet *reference frame* links as children of the table, and hangs the magnet meshes off those frames
+  - Adds Isaac Sim <loop_joint> spherical constraints: (ball frame) <-> (magnet frame)
+-->
+
 <robot name="ball_balancer_system">
 
   <!-- World link -->
   <link name="world"/>
 
   <!-- =======================
-       ROBOT (formerly ball_balancer2)
+       ROBOT (from new export)
        ======================= -->
 
-  <link name="robot_base_link">
+  <link name="base_link">
     <inertial>
-      <origin xyz="-0.00015538 0.039405 0.00054565" rpy="0 0 0" />
-      <mass value="0.25395" />
+      <origin xyz="-8.53269468997393E-05 -0.00541038171468997 0.0257753456010168" rpy="0 0 0" />
+      <mass value="0.330312516893083" />
       <inertia
-        ixx="0.00052253" ixy="-1.5515E-06" ixz="-2.7765E-06"
-        iyy="0.00059627" iyz="4.2751E-06"
-        izz="0.00051908" />
+        ixx="0.000550970671660998" ixy="2.50150816127138E-06" ixz="-8.07559804129496E-07"
+        iyy="0.0005529500250387"   iyz="6.90294258833593E-07"
+        izz="0.00108582378078189" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://ball_balancer2/meshes/base_link.STL" />
+        <mesh filename="package://ball_balancer/meshes/base_link.STL" />
       </geometry>
       <material name="">
-        <color rgba="0.79216 0.81961 0.93333 1" />
+        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
       </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://ball_balancer2/meshes/base_link.STL" />
+        <mesh filename="package://ball_balancer/meshes/base_link.STL" />
       </geometry>
     </collision>
   </link>
 
   <!-- Fix robot base to world -->
-  <joint name="world_to_robot_base" type="fixed">
+  <joint name="world_to_base_link" type="fixed">
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <parent link="world"/>
-    <child link="robot_base_link"/>
+    <child link="base_link"/>
   </joint>
 
   <!-- Servo arm 1 -->
-  <link name="servo_arm_1">
+  <link name="Servo_arm_1">
     <inertial>
-      <origin xyz="3.6744E-05 0.014137 -6.245E-17" rpy="0 0 0" />
-      <mass value="0.0030998" />
+      <origin xyz="0.000788143290747698 0.0108393743852739 -4.16333634234434E-16" rpy="0 0 0" />
+      <mass value="0.00867785481542915" />
       <inertia
-        ixx="7.5306E-07" ixy="1.4846E-22" ixz="2.8325E-25"
-        iyy="5.9756E-08" iyz="-1.1677E-21"
-        izz="7.0606E-07" />
+        ixx="1.91158601635292E-06" ixy="-8.11064018692988E-09" ixz="4.55009362279128E-22"
+        iyy="2.277418775442E-07"   iyz="6.81030481805436E-20"
+        izz="1.81279581350402E-06" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://ball_balancer2/meshes/servo_arm.STL" />
+        <mesh filename="package://ball_balancer/meshes/Servo_arm_1.STL" />
       </geometry>
       <material name="">
-        <color rgba="0.79216 0.81961 0.93333 1" />
+        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
       </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://ball_balancer2/meshes/servo_arm.STL" />
+        <mesh filename="package://ball_balancer/meshes/Servo_arm_1.STL" />
       </geometry>
     </collision>
   </link>
 
-  <joint name="servo_arm_1_revolute" type="revolute">
-    <origin xyz="-0.0073 -0.065736 0.03755" rpy="0 0 0" />
-    <parent link="robot_base_link" />
-    <child link="servo_arm_1" />
+  <joint name="Servo_arm_1_revolute" type="revolute">
+    <origin xyz="0.063196 -0.0049738 0.07505" rpy="0 0 1.5708" />
+    <parent link="base_link" />
+    <child link="Servo_arm_1" />
     <axis xyz="-1 0 0" />
-    <limit lower="-1.57" upper="0" effort="1.9" velocity="5.5" />
+    <limit lower="0" upper="0" effort="0" velocity="0" />
   </joint>
 
-  <link name="table_arm_1">
+  <link name="Table_arm_1">
     <inertial>
-      <origin xyz="0.0020032 -0.030246 -1.1886E-08" rpy="0 0 0" />
-      <mass value="0.0025632" />
+      <origin xyz="1.99440131783951E-08 -0.0235434815413484 7.79852053767183E-09" rpy="0 0 0" />
+      <mass value="0.003906747783009" />
       <inertia
-        ixx="2.5398E-07" ixy="2.2472E-08" ixz="3.5056E-14"
-        iyy="3.1017E-08" iyz="-3.7374E-13"
-        izz="2.4742E-07" />
+        ixx="4.84797263521725E-07" ixy="1.28297530598978E-12" ixz="4.3644567934529E-15"
+        iyy="4.99585473986316E-08" iyz="5.41102266342963E-13"
+        izz="4.75313289360912E-07" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://ball_balancer2/meshes/table_arm.STL" />
+        <mesh filename="package://ball_balancer/meshes/Table_arm_1.STL" />
       </geometry>
       <material name="">
-        <color rgba="0.79216 0.81961 0.93333 1" />
+        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
       </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://ball_balancer2/meshes/table_arm.STL" />
+        <mesh filename="package://ball_balancer/meshes/Table_arm_1.STL" />
       </geometry>
     </collision>
   </link>
 
-  <joint name="table_arm_1_revolute" type="revolute">
-    <origin xyz="0.00455 0.039365 0" rpy="-0.47144 0 0" />
-    <parent link="servo_arm_1" />
-    <child link="table_arm_1" />
-    <axis xyz="1 0 0" />
-    <limit lower="-3.14" upper="0" effort="1.9" velocity="5.5" />
+  <joint name="Table_arm_1_revolute" type="revolute">
+    <origin xyz="0 0.039365 0" rpy="-0.39093 0 0" />
+    <parent link="Servo_arm_1" />
+    <child link="Table_arm_1" />
+    <axis xyz="-1 0 0" />
+    <limit lower="0" upper="0" effort="0" velocity="0" />
   </joint>
 
-  <link name="table_arm_1_ball" />
-  <joint name="table_arm_1_ball_joint" type="fixed" dont_collapse="true">
-    <origin xyz="0.00275 -0.054583 0" rpy="0 0 0" />
-    <parent link="table_arm_1" />
-    <child link="table_arm_1_ball" />
+  <!-- Ball 1: frame-only link (no mesh) at the SAME joint frame as the new export -->
+  <link name="Table_arm_1_ball" />
+  <joint name="Table_arm_1_ball_joint" type="fixed" dont_collapse="true">
+    <origin xyz="0 -0.053793 0" rpy="0 0 0" />
+    <parent link="Table_arm_1" />
+    <child link="Table_arm_1_ball" />
   </joint>
+
 
   <!-- Servo arm 2 -->
-  <link name="servo_arm_2">
+  <link name="Servo_arm_2">
     <inertial>
-      <origin xyz="3.67444957071403E-05 0.0141374705075078 -2.06779038336435E-15" rpy="0 0 0" />
-      <mass value="0.00309980999161893" />
+      <origin xyz="0.000788143290747546 0.0108393743852739 -4.44089209850063E-16" rpy="0 0 0" />
+      <mass value="0.00867785481542916" />
       <inertia
-        ixx="7.53064525555482E-07" ixy="2.15066959263787E-23" ixz="9.0989867380833E-24"
-        iyy="5.9755946353975E-08" iyz="-1.34292772447984E-21"
-        izz="7.06064992829684E-07" />
+        ixx="1.91158601635292E-06" ixy="-8.1106401869093E-09" ixz="2.94722415550036E-22"
+        iyy="2.277418775442E-07"   iyz="6.77412031619806E-20"
+        izz="1.81279581350402E-06" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://ball_balancer2/meshes/servo_arm.STL" />
+        <mesh filename="package://ball_balancer/meshes/Servo_arm_2.STL" />
       </geometry>
       <material name="">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
@@ -141,32 +150,32 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://ball_balancer2/meshes/servo_arm.STL" />
+        <mesh filename="package://ball_balancer/meshes/Servo_arm_2.STL" />
       </geometry>
     </collision>
   </link>
 
-  <joint name="servo_arm_2_revolute" type="revolute">
-    <origin xyz="0.060579 0.026546 0.03755" rpy="-0.010265 0 2.0944" />
-    <parent link="robot_base_link" />
-    <child link="servo_arm_2" />
+  <joint name="Servo_arm_2_revolute" type="revolute">
+    <origin xyz="-0.032304 -0.060111 0.07505" rpy="0 0 -0.5236" />
+    <parent link="base_link" />
+    <child link="Servo_arm_2" />
     <axis xyz="-1 0 0" />
-    <limit lower="-1.57" upper="0" effort="1.9" velocity="5.5" />
+    <limit lower="0" upper="0" effort="0" velocity="0" />
   </joint>
 
-  <link name="table_arm_2">
+  <link name="Table_arm_2">
     <inertial>
-      <origin xyz="0.00200322317368745 -0.0302455787102662 -7.30162207432383E-09" rpy="0 0 0" />
-      <mass value="0.00256321315526102" />
+      <origin xyz="-1.99440131787992E-08 -0.0235434815413484 -7.79852055154961E-09" rpy="0 0 0" />
+      <mass value="0.00390674778300901" />
       <inertia
-        ixx="2.53975309310461E-07" ixy="2.24716883099034E-08" ixz="3.38452589465274E-14"
-        iyy="3.1017255098745E-08" iyz="-2.38983580560879E-13"
-        izz="2.47420430501569E-07" />
+        ixx="4.84797263521728E-07" ixy="-1.28297530583839E-12" ixz="4.36445677178268E-15"
+        iyy="4.99585473986317E-08" iyz="-5.41102266382668E-13"
+        izz="4.75313289360915E-07" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://ball_balancer2/meshes/table_arm.STL" />
+        <mesh filename="package://ball_balancer/meshes/Table_arm_2.STL" />
       </geometry>
       <material name="">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
@@ -175,41 +184,170 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://ball_balancer2/meshes/table_arm.STL" />
+        <mesh filename="package://ball_balancer/meshes/Table_arm_2.STL" />
       </geometry>
     </collision>
   </link>
 
-  <joint name="table_arm_2_revolute" type="revolute">
-    <origin xyz="0.00455 0.039365 0" rpy="-0.46126 0 0" />
-    <parent link="servo_arm_2" />
-    <child link="table_arm_2" />
+  <joint name="Table_arm_2_revolute" type="revolute">
+    <origin xyz="0 0.039365 0" rpy="-0.39093 0 0" />
+    <parent link="Servo_arm_2" />
+    <child link="Table_arm_2" />
     <axis xyz="1 0 0" />
-    <limit lower="-3.14" upper="0" effort="1.9" velocity="5.5" />
+    <limit lower="0" upper="0" effort="0" velocity="0" />
   </joint>
 
-  <link name="table_arm_2_ball" />
-  <joint name="table_arm_2_ball_joint" type="fixed" dont_collapse="true">
-    <origin xyz="0.00275 -0.054583 0" rpy="0 0 0" />
-    <parent link="table_arm_2" />
-    <child link="table_arm_2_ball" />
+  <!-- Ball 2: frame-only link -->
+  <link name="Table_arm_2_ball" />
+  <joint name="Table_arm_2_ball_joint" type="fixed" dont_collapse="true">
+    <origin xyz="0 -0.053793 0" rpy="0 0 0" />
+    <parent link="Table_arm_2" />
+    <child link="Table_arm_2_ball" />
   </joint>
 
-  <!-- Servo arm 3 (inertial fixed to match other arms) -->
-  <link name="servo_arm_3">
+
+  <!-- Servo arm 3 -->
+  <link name="Servo_arm_3">
     <inertial>
-      <!-- Using same inertial values as servo_arm_2 (same model) -->
-      <origin xyz="3.67444957071403E-05 0.0141374705075078 -2.06779038336435E-15" rpy="0 0 0" />
-      <mass value="0.00309980999161893" />
+      <origin xyz="0.000788143290747619 0.0108393743852739 -4.16333634234434E-16" rpy="0 0 0" />
+      <mass value="0.00867785481542916" />
       <inertia
-        ixx="7.53064525555482E-07" ixy="2.15066959263787E-23" ixz="9.0989867380833E-24"
-        iyy="5.9755946353975E-08" iyz="-1.34292772447984E-21"
-        izz="7.06064992829684E-07" />
+        ixx="1.91158601635292E-06" ixy="-8.11064018691775E-09" ixz="4.69991614977646E-22"
+        iyy="2.277418775442E-07"   iyz="6.78351139231831E-20"
+        izz="1.81279581350402E-06" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://ball_balancer2/meshes/servo_arm.STL" />
+        <mesh filename="package://ball_balancer/meshes/Servo_arm_3.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://ball_balancer/meshes/Servo_arm_3.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="Servo_arm_3_revolute" type="revolute">
+    <origin xyz="-0.032304 0.050163 0.07505" rpy="0 0 -2.618" />
+    <parent link="base_link" />
+    <child link="Servo_arm_3" />
+    <axis xyz="-1 0 0" />
+    <limit lower="0" upper="0" effort="0" velocity="0" />
+  </joint>
+
+  <link name="Table_arm_3">
+    <inertial>
+      <origin xyz="1.99440131701256E-08 -0.0235434815413484 7.79852052379404E-09" rpy="0 0 0" />
+      <mass value="0.003906747783009" />
+      <inertia
+        ixx="4.84797263521727E-07" ixy="1.28297530587809E-12" ixz="4.36445682472224E-15"
+        iyy="4.99585473986317E-08" iyz="5.41102266043937E-13"
+        izz="4.75313289360913E-07" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://ball_balancer/meshes/Table_arm_3.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://ball_balancer/meshes/Table_arm_3.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="Table_arm_3_revolute" type="revolute">
+    <origin xyz="0 0.039365 0" rpy="-0.39093 0 0" />
+    <parent link="Servo_arm_3" />
+    <child link="Table_arm_3" />
+    <axis xyz="-1 0 0" />
+    <limit lower="0" upper="0" effort="0" velocity="0" />
+  </joint>
+
+  <!-- Ball 3: frame-only link -->
+  <link name="Table_arm_3_ball" />
+  <joint name="Table_arm_3_ball_joint" type="fixed" dont_collapse="true">
+    <origin xyz="0 -0.053793 0" rpy="0 0 0" />
+    <parent link="Table_arm_3" />
+    <child link="Table_arm_3_ball" />
+  </joint>
+
+
+  <!-- =======================
+       TABLE (from new export)
+       ======================= -->
+
+  <link name="Table">
+    <inertial>
+      <origin xyz="3.14728472654048E-10 7.69662304886694E-11 -0.0025047310879116" rpy="0 0 0" />
+      <mass value="0.113623772682042" />
+      <inertia
+        ixx="0.000203322360548276" ixy="1.84626501287385E-13" ixz="4.51554827674676E-14"
+        iyy="0.000203322360267381" iyz="1.03152611607545E-14"
+        izz="0.000406174294690233" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://ball_balancer/meshes/Table.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://ball_balancer/meshes/Table.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Keep table as its own link (and prevent collapsing) -->
+  <joint name="Table_joint" type="fixed" dont_collapse="true">
+    <origin xyz="-0.00047047 -0.0049738 0.10505" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="Table" />
+  </joint>
+
+
+  <!-- =======================
+       MAGNETS: frame links (children of table) + meshes hanging off them
+       ======================= -->
+
+  <!-- Magnet 1 reference frame (child of table) -->
+  <link name="table_magnet_1_link" />
+  <joint name="table_magnet_1_joint" type="fixed" dont_collapse="true">
+    <origin xyz="0.074036 0 -0.0095" rpy="0 0 0" />
+    <parent link="Table" />
+    <child link="table_magnet_1_link" />
+  </joint>
+
+  <!-- Magnet 1 mesh uses new geometry, attached at the magnet frame -->
+  <link name="Magnet_1">
+    <inertial>
+      <origin xyz="-0.0728280612321231 0.000764587574327347 -0.0496160051959588" rpy="0 0 0" />
+      <mass value="0.511178872279149" />
+      <inertia
+        ixx="0.00153044112454908" ixy="1.1159086834465E-05" ixz="2.2081961722913E-05"
+        iyy="0.00158482976151322" iyz="1.34424690113471E-05"
+        izz="0.00155031281812465" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://ball_balancer/meshes/Magnet_1.STL" />
       </geometry>
       <material name="">
         <color rgba="1 1 1 1" />
@@ -218,137 +356,117 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://ball_balancer2/meshes/servo_arm.STL" />
+        <mesh filename="package://ball_balancer/meshes/Magnet_1.STL" />
       </geometry>
     </collision>
   </link>
 
-  <joint name="servo_arm_3_revolute" type="revolute">
-    <origin xyz="-0.053279 0.03919 0.03755" rpy="-0.010265 0 -2.0944" />
-    <parent link="robot_base_link" />
-    <child link="servo_arm_3" />
-    <axis xyz="-1 0 0" />
-    <limit lower="-1.57" upper="0" effort="1.9" velocity="5.5" />
-  </joint>
-
-  <link name="table_arm_3">
-    <inertial>
-      <origin xyz="0.00200321165845766 -0.0302455610368241 -7.73754285990358E-09" rpy="0 0 0" />
-      <mass value="0.00256319659543894" />
-      <inertia
-        ixx="2.53973421781188E-07" ixy="2.24712999182535E-08" ixz="1.10207121719404E-13"
-        iyy="3.10171892862842E-08" iyz="-2.43362774805972E-13"
-        izz="2.47418381574632E-07" />
-    </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://ball_balancer2/meshes/table_arm.STL" />
-      </geometry>
-      <material name="">
-        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://ball_balancer2/meshes/table_arm.STL" />
-      </geometry>
-    </collision>
-  </link>
-
-  <joint name="table_arm_3_revolute" type="revolute">
-    <origin xyz="0.00455 0.039365 0" rpy="-0.46126 0 0" />
-    <parent link="servo_arm_3" />
-    <child link="table_arm_3" />
-    <axis xyz="1 0 0" />
-    <limit lower="-3.14" upper="0" effort="1.9" velocity="5.5" />
-  </joint>
-
-  <link name="table_arm_3_ball" />
-  <joint name="table_arm_3_ball_joint" type="fixed" dont_collapse="true">
-    <origin xyz="0.00275 -0.054583 0" rpy="0 0 0" />
-    <parent link="table_arm_3" />
-    <child link="table_arm_3_ball" />
+  <joint name="Magnet_1_mesh_joint" type="fixed" dont_collapse="true">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="table_magnet_1_link" />
+    <child link="Magnet_1" />
   </joint>
 
 
-  <!-- =======================
-       TABLE (formerly ball_balancer_table)
-       ======================= -->
-
-  <link name="table_link">
-    <inertial>
-      <origin xyz="-3.06281976340791E-10 0.0024952689120884 6.22399215003891E-11" rpy="0 0 0" />
-      <mass value="0.113623772682042" />
-      <inertia
-        ixx="0.000203272394718795" ixy="-4.39151056766037E-14" ixz="-1.44707292868474E-13"
-        iyy="0.000406074363039218" iyz="8.22732076088615E-15"
-        izz="0.000203272394445846" />
-    </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://ball_balancer2/meshes/table.STL" />
-      </geometry>
-      <material name="">
-        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://ball_balancer2/meshes/table.STL" />
-      </geometry>
-    </collision>
-  </link>
-
-  <!-- Table is a free rigid body relative to robot base -->
-  <joint name="robot_to_table_floating" type="fixed" dont_collapse="true">
-    <origin xyz="0 0 0.0665733158" rpy="0 0 0"/>
-    <parent link="robot_base_link"/>
-    <child link="table_link"/>
-  </joint>
-
-  <!-- Magnet reference frames on the table -->
-  <link name="table_magnet_1_link" />
-  <joint name="table_magnet_1_joint" type="fixed" dont_collapse="true">
-    <origin xyz="0 -0.075 -0.0045" rpy="0 0 3.1416" />
-    <parent link="table_link" />
-    <child link="table_magnet_1_link" />
-  </joint>
-
+  <!-- Magnet 2 reference frame -->
   <link name="table_magnet_2_link" />
   <joint name="table_magnet_2_joint" type="fixed" dont_collapse="true">
-    <origin xyz="0.064952 0.0375 -0.0045" rpy="0 0 3.1416" />
-    <parent link="table_link" />
+    <origin xyz="-0.037018 -0.064117 -0.0095" rpy="0 0 0" />
+    <parent link="Table" />
     <child link="table_magnet_2_link" />
   </joint>
 
+  <link name="Magnet_2">
+    <inertial>
+      <origin xyz="0.0382261359559862 0.0648817582155204 -0.0496160051959597" rpy="0 0 0" />
+      <mass value="0.511178872279149" />
+      <inertia
+        ixx="0.00153044112454908" ixy="1.1159086834465E-05" ixz="2.2081961722913E-05"
+        iyy="0.00158482976151322" iyz="1.34424690113471E-05"
+        izz="0.00155031281812465" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://ball_balancer/meshes/Magnet_2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://ball_balancer/meshes/Magnet_2.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="Magnet_2_mesh_joint" type="fixed" dont_collapse="true">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="table_magnet_2_link" />
+    <child link="Magnet_2" />
+  </joint>
+
+
+  <!-- Magnet 3 reference frame -->
   <link name="table_magnet_3_link" />
   <joint name="table_magnet_3_joint" type="fixed" dont_collapse="true">
-    <origin xyz="-0.064952 0.0375 -0.0045" rpy="0 0 3.1416" />
-    <parent link="table_link" />
+    <origin xyz="-0.037018 0.064117 -0.0095" rpy="0 0 0" />
+    <parent link="Table" />
     <child link="table_magnet_3_link" />
+  </joint>
+
+  <link name="Magnet_3">
+    <inertial>
+      <origin xyz="0.0382261359559868 -0.0633525830668657 -0.0496160051959588" rpy="0 0 0" />
+      <mass value="0.511178872279149" />
+      <inertia
+        ixx="0.00153044112454908" ixy="1.1159086834465E-05" ixz="2.2081961722913E-05"
+        iyy="0.00158482976151322" iyz="1.34424690113471E-05"
+        izz="0.00155031281812465" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://ball_balancer/meshes/Magnet_3.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://ball_balancer/meshes/Magnet_3.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="Magnet_3_mesh_joint" type="fixed" dont_collapse="true">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="table_magnet_3_link" />
+    <child link="Magnet_3" />
   </joint>
 
 
   <!-- =======================
-       ISAAC SIM CLOSED-LOOP CONSTRAINTS
+       ISAAC SIM CLOSED-LOOP CONSTRAINTS (same idea as old file)
        ======================= -->
   <!-- These are Isaac Sim importer extensions (not standard URDF). -->
-  <loop_joint name="leg1_ball_to_table" type="spherical">
-    <link1 link="table_arm_1_ball" xyz="0 0 0" rpy="0 0 0"/>
+
+  <loop_joint name="leg1_ball_to_magnet" type="spherical">
+    <link1 link="Table_arm_1_ball" xyz="0 0 0" rpy="0 0 0"/>
     <link2 link="table_magnet_1_link" xyz="0 0 0" rpy="0 0 0"/>
   </loop_joint>
 
-  <loop_joint name="leg2_ball_to_table" type="spherical">
-    <link1 link="table_arm_2_ball" xyz="0 0 0" rpy="0 0 0"/>
+  <loop_joint name="leg2_ball_to_magnet" type="spherical">
+    <link1 link="Table_arm_2_ball" xyz="0 0 0" rpy="0 0 0"/>
     <link2 link="table_magnet_2_link" xyz="0 0 0" rpy="0 0 0"/>
   </loop_joint>
 
-  <loop_joint name="leg3_ball_to_table" type="spherical">
-    <link1 link="table_arm_3_ball" xyz="0 0 0" rpy="0 0 0"/>
+  <loop_joint name="leg3_ball_to_magnet" type="spherical">
+    <link1 link="Table_arm_3_ball" xyz="0 0 0" rpy="0 0 0"/>
     <link2 link="table_magnet_3_link" xyz="0 0 0" rpy="0 0 0"/>
   </loop_joint>
 

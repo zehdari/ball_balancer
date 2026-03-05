@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ball-balance-lab"
+version = "0.1.0"
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ball_balance_lab*"]
+
+[tool.setuptools.package-data]
+ball_balance_lab = ["**/*.usd", "**/*.yaml"]
