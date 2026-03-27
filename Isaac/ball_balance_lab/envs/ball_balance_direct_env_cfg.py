@@ -94,6 +94,23 @@ class BallBalanceDirectEnvCfg(DirectRLEnvCfg):
     reset_ball_height = 0.20
     reset_ball_linvel = 0.1 
 
+    #target position tracking, set fixed vertices for square 
+    #clockwise ordered, repeatable path
+    square_targets_xy = (
+        (-0.03, -0.03),
+        ( 0.03, -0.03),
+        ( 0.03,  0.03),
+        (-0.03,  0.03),
+    )
+    #consider target "reached" when ball is close enough and moving slow enough
+    target_radius = 0.01
+    target_speed_tolerance = 0.04
+
+    #hold on target for several steps
+    target_hold_steps = 4
+    target_bonus = 0.25
+
+
     # --- termination ---
     # if ball goes too far from center in table frame
     ball_fail_radius = 0.09

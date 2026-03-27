@@ -29,6 +29,27 @@ class BallBalanceDirectEnv(DirectRLEnv):
             (self.num_envs, 3), device=self.device
         )
 
+        self._targets_xy = torch.tensor(
+            self.cfg.square_targets_xy, 
+            dtype=torch.float32,
+            device=self.device,
+        )
+
+        self._num_targets = self._targets_xy.shape[0]
+
+        #target progress state
+        self._current_target_idx = torch.zeros(
+            self.num_envs, dtype=torch.long, device=self.device
+        )
+        self._target_hold_counter = torch.zeros(
+            self.num_envs, dtype=torch.long, device=self.device
+        )
+        
+    
+
+
+
+
     # Reset
     def _reset_idx(self, env_ids: torch.Tensor):
         super()._reset_idx(env_ids)
@@ -36,6 +57,10 @@ class BallBalanceDirectEnv(DirectRLEnv):
         self._servo_joint_pos_target_rad[env_ids] = \
             self._servo_joint_pos_nominal_rad[env_ids]
         self._prev_servo_actions[env_ids] = 0.0
+
+        #reset to first target
+        self._current_target_idx[env_ids] = 0
+        self._target_hold_counter[env_ids] = 0
 
         # robot joints
         joint_pos = self.robot.data.default_joint_pos[env_ids].clone()
@@ -78,6 +103,7 @@ class BallBalanceDirectEnv(DirectRLEnv):
         self.ball.reset(env_ids=env_ids)
 
         self.scene.write_data_to_sim()
+        self.scene.write_data_to_sim()
         for _ in range(2):
             self.sim.step()
         self.scene.update(dt=self.cfg.sim.dt)
@@ -112,7 +138,7 @@ class BallBalanceDirectEnv(DirectRLEnv):
     # Observations:
     # servo_joint_pos_rad(3),
     # servo_joint_vel_rad_s(3),
-    # ball_pos_xy_base_m(2),
+    # ball_pos_xy_error_to_target_m(2),
     # ball_vel_xy_base_m_s(2) -> total = 10
     def _get_observations(self) -> dict:
         servo_joint_pos_rad = self.robot.data.joint_pos[:, self.servo_ids]
@@ -134,11 +160,14 @@ class BallBalanceDirectEnv(DirectRLEnv):
         ball_pos_xy_base_m = ball_pos_base[:, 0:2]
         ball_vel_xy_base_m_s = ball_vel_base[:, 0:2]
 
+        current_targets_xy = self._targets_xy[self._current_target_idx]
+        target_error_xy_m = ball_pos_xy_base_m - current_targets_xy
+
         obs = torch.cat(
             [
                 servo_joint_pos_rad,
                 servo_joint_vel_rad_s,
-                ball_pos_xy_base_m,
+                target_error_xy_m,
                 ball_vel_xy_base_m_s,
             ],
             dim=1,
@@ -163,20 +192,49 @@ class BallBalanceDirectEnv(DirectRLEnv):
         ball_xy_base_m = ball_pos_base[:, 0:2]
         ball_vxy_base_m_s = ball_vel_base[:, 0:2]
 
-        dist_m = torch.norm(ball_xy_base_m, dim=-1)
+        current_targets_xy = self._targets_xy[self._current_target_idx]
+        target_error_xy_m = ball_xy_base_m - current_targets_xy
+
+        dist_to_target_m = torch.norm(target_error_xy_m, dim=-1)
         speed_m_s = torch.norm(ball_vxy_base_m_s, dim=-1)
 
-        pos_reward = 1.0 / (1.0 + dist_m)
+        pos_reward = 1.0 / (1.0 + dist_to_target_m)
         speed_reward = 1.0 / (1.0 + speed_m_s)
 
-        total_reward = pos_reward * speed_reward
+        target_reached = (
+            (dist_to_target_m <= self.cfg.target_radius)
+            & (speed_m_s <= self.cfg.target_speed_tolerance)
+        )
+
+        self._target_hold_counter = torch.where(
+            target_reached,
+            self._target_hold_counter + 1,
+            torch.zeros_like(self._target_hold_counter),
+        )
+
+        #For every env where the current target reaches required hold time,
+        #increment to next current target, and wrap back to start at end
+        target_completed = self._target_hold_counter >= self.cfg.target_hold_steps
+        completion_bonus = target_completed.float() * self.cfg.target_bonus
+
+        completed_env_ids = torch.nonzero(target_completed, as_tuple=False).squeeze(-1)
+        if completed_env_ids.numel() > 0:
+            self._current_target_idx[completed_env_ids] = (
+                self._current_target_idx[completed_env_ids] + 1
+            ) % self._num_targets
+            self._target_hold_counter[completed_env_ids] = 0
+
+        total_reward = pos_reward * speed_reward + completion_bonus
 
         if "log" not in self.extras:
             self.extras["log"] = {}
-        self.extras["log"]["dist_m_mean"] = dist_m.mean()
+        self.extras["log"]["dist_to_target_m_mean"] = dist_to_target_m.mean()
         self.extras["log"]["speed_m_s_mean"] = speed_m_s.mean()
         self.extras["log"]["pos_reward_mean"] = pos_reward.mean()
         self.extras["log"]["speed_reward_mean"] = speed_reward.mean()
+        self.extras["log"]["completion_bonus_mean"] = completion_bonus.mean()
+        self.extras["log"]["current_target_idx_mean"] = \
+            self._current_target_idx.float().mean()
         self.extras["log"]["total_reward_mean"] = total_reward.mean()
 
         return total_reward
