@@ -32,10 +32,10 @@ BALL_BALANCER_CFG = ArticulationCfg(
                 "Servo_arm_2_revolute",
                 "Servo_arm_3_revolute",
             ],
-            stiffness=100.0,
-            damping=20.0,
-            effort_limit=2.0,
-            velocity_limit=3.0,
+            stiffness=140.0,
+            damping=12.0,
+            effort_limit_sim=4.0,
+            velocity_limit_sim=6.0,
         )
     },
 )

@@ -50,7 +50,7 @@ class BallBalanceSceneCfg(InteractiveSceneCfg):
 class BallBalanceDirectEnvCfg(DirectRLEnvCfg):
     # --- env ---
     decimation = 2 # apply actions every 2 sim steps
-    episode_length_s = 10.0
+    episode_length_s = 20.0
     action_space = 3
     observation_space = 10 # [q(3), qd(3), ball_pos_xy(2), ball_vel_xy(2)]
     state_space = 0
@@ -86,13 +86,13 @@ class BallBalanceDirectEnvCfg(DirectRLEnvCfg):
     ]
 
     # --- action scaling ---
-    action_scale_rad = 0.12 # map [-1,1] -> +/- this many radians around nominal
-    action_smoothing = 0.0
+    action_scale_rad = 0.18 # map [-1,1] -> +/- this many radians around nominal
+    action_smoothing = 0.15
 
     # --- reset randomization ---
-    reset_ball_xy_range = 0.03
-    reset_ball_height = 0.20
-    reset_ball_linvel = 0.1 
+    reset_ball_xy_range = 0.015
+    reset_ball_height = 0.14
+    reset_ball_linvel = 0.03
 
     #target position tracking, set fixed vertices for square 
     #clockwise ordered, repeatable path
@@ -103,20 +103,35 @@ class BallBalanceDirectEnvCfg(DirectRLEnvCfg):
         (-0.03,  0.03),
     )
     #consider target "reached" when ball is close enough and moving slow enough
-    target_radius = 0.01
-    target_speed_tolerance = 0.04
+    target_radius = 0.012
+    target_speed_tolerance = 0.14
 
     #hold on target for several steps
-    target_hold_steps = 4
-    target_bonus = 0.25
+    target_hold_steps = 1
+    target_bonus = 5.0
+
+    #reward shaping
+    pos_reward_scale = 30.0
+    progress_reward_scale = 12.0
+    move_to_target_reward_scale = 3.5
+
+    near_target_radius = 0.012
+    settle_reward_scale = 0.25
+    settle_speed_scale = 10.0
+
+    previous_target_linger_radius = 0.015
+    linger_previous_penalty_scale = 0.5
+
+    action_rate_penalty_scale = 0.02
+    joint_vel_penalty_scale = 0.0005
 
 
     # --- termination ---
     # if ball goes too far from center in table frame
-    ball_fail_radius = 0.09
+    ball_fail_radius = 0.11
 
     scene: BallBalanceSceneCfg = BallBalanceSceneCfg(
-        num_envs=512,  # more parallel envs = stable gradient estimates
+        num_envs=2048,  # more parallel envs = stable gradient estimates
         env_spacing=1.0,
         replicate_physics=True,
         clone_in_fabric=False,
