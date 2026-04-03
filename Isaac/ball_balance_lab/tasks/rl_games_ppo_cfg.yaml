@@ -65,9 +65,11 @@ params:
     tau: 0.95     # GAE lambda for advantage estimation - fine to leave as-is
 
     # --- learning rate ---
-    learning_rate: 3e-4   # initial LR - safe range is 1e-4 to 1e-3. go lower if training is unstable
+    #learning_rate: 3e-4   # initial LR - safe range is 1e-4 to 1e-3. go lower if training is unstable
+    learning_rate: 1e-4
     lr_schedule: adaptive # adjusts LR based on KL divergence - keep adaptive
-    kl_threshold: 0.008   # target KL for adaptive LR schedule - lower = more conservative updates
+    #kl_threshold: 0.008   # target KL for adaptive LR schedule - lower = more conservative updates
+    kl_threshold: 0.005
 
     score_to_win: 20000   # early-stop if mean score hits this - effectively disabled at this value
 
@@ -80,12 +82,12 @@ params:
 
     # --- PPO loss ---
     grad_norm: 1.0        # gradient clipping threshold - leave this alone
-    entropy_coef: 0.0     # entropy bonus - small value (e.g. 0.001) can help exploration if policy gets stuck
+    entropy_coef: 0.001     # entropy bonus(started at 0) - small value (e.g. 0.001) can help exploration if policy gets stuck
     truncate_grads: True  # clips gradients by grad_norm - leave this alone
     e_clip: 0.2           # PPO clip epsilon - standard value, leave this alone
 
     # --- rollout and batch sizes ---
-    horizon_length: 16    # steps collected per env before each update - increase for smoother gradients
+    horizon_length: 32    # steps collected per env before each update - increase for smoother gradients
     minibatch_size: 8192  # samples per gradient step - reduce if running out of GPU memory
     mini_epochs: 8        # passes over the rollout buffer per update - leave this alone
 

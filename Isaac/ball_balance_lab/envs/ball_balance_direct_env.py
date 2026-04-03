@@ -222,17 +222,24 @@ class BallBalanceDirectEnv(DirectRLEnv):
         previous_target_error_xy_m = ball_xy_base_m - previous_targets_xy
         dist_to_previous_target_m = torch.norm(previous_target_error_xy_m, dim=-1)
 
+        #Only apply penalty for being close to previous target AFTER the target switches
+        previous_is_different = (
+            self._current_target_idx != self._previous_target_idx
+        ).float()
+
         linger_previous_penalty = self.cfg.linger_previous_penalty_scale * (
             dist_to_previous_target_m < self.cfg.previous_target_linger_radius
-        ).float() * (dist_to_target_m > self.cfg.target_radius).float()
+        ).float() * (dist_to_target_m > self.cfg.target_radius).float() * previous_is_different
 
 
         #Dense position reward, get as close as possible
-        pos_reward = torch.exp(-self.cfg.pos_reward_scale * dist_to_target_m)
+        pos_reward = 0.15 * torch.exp(-self.cfg.pos_reward_scale * dist_to_target_m)
 
         #reward reducing distance each step, using old distance
-        progress_reward = self.cfg.progress_reward_scale * (
-            self._prev_dist_to_target - dist_to_target_m
+        progress_reward = self.cfg.progress_reward_scale * torch.clamp(
+            self._prev_dist_to_target - dist_to_target_m,
+            min=-0.002,
+            max=0.002,
         )
 
         #reward moving faster when farther away
@@ -240,14 +247,16 @@ class BallBalanceDirectEnv(DirectRLEnv):
             dist_to_target_m.unsqueeze(-1), min=1e-6
         )
         velocity_toward_target = torch.sum(ball_vxy_base_m_s * dir_to_target, dim=-1)
+
         move_to_target_reward = self.cfg.move_to_target_reward_scale * torch.clamp(
             velocity_toward_target, min=0.0
-        ) * (dist_to_target_m > self.cfg.near_target_radius).float()
+        ) * (dist_to_target_m > self.cfg.target_radius).float()
 
         #slow down when close to target, higher reward for lower speed, when close.
         settle_reward = self.cfg.settle_reward_scale * torch.exp(
             -self.cfg.settle_speed_scale * speed_m_s
         ) * (dist_to_target_m <= self.cfg.near_target_radius).float()
+        
 
         #penalize unnecesarry / random jittering.
         action_rate_penalty = self.cfg.action_rate_penalty_scale * torch.sum(
@@ -272,6 +281,8 @@ class BallBalanceDirectEnv(DirectRLEnv):
 
         target_completed = self._target_hold_counter >= self.cfg.target_hold_steps
         completion_bonus = target_completed.float() * self.cfg.target_bonus
+
+      
 
         completed_env_ids = torch.nonzero(target_completed, as_tuple=False).squeeze(-1)
 
