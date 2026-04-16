@@ -22,33 +22,85 @@ class BallBalanceDirectEnv(DirectRLEnv):
         self._servo_joint_pos_nominal_rad = torch.full(
             (self.num_envs, 3), -0.35, device=self.device
         )
-        self._servo_joint_pos_target_rad = (
-            self._servo_joint_pos_nominal_rad.clone()
-        )
+        self._servo_joint_pos_target_rad = self._servo_joint_pos_nominal_rad.clone()
         self._prev_servo_actions = torch.zeros(
             (self.num_envs, 3), device=self.device
         )
 
-        self._targets_xy = torch.tensor(
-            self.cfg.square_targets_xy, 
-            dtype=torch.float32,
-            device=self.device,
-        )
-
+        self._targets_xy = self._build_targets_xy()
         self._num_targets = self._targets_xy.shape[0]
 
-        #target progress state
+        # target progress state
         self._current_target_idx = torch.zeros(
             self.num_envs, dtype=torch.long, device=self.device
         )
         self._target_hold_counter = torch.zeros(
             self.num_envs, dtype=torch.long, device=self.device
         )
-        
-    
+        self._prev_dist_to_target = torch.zeros(
+            self.num_envs, dtype=torch.float32, device=self.device
+        )
+        self._previous_target_idx = torch.zeros(
+            self.num_envs, dtype=torch.long, device=self.device
+        )
 
+    def _build_targets_xy(self) -> torch.Tensor:
+        shape = self.cfg.target_shape.lower()
+        r = float(self.cfg.target_radius_m)
+        n = int(self.cfg.target_num_points)
 
+        if shape == "square":
+            pts = [
+                (-r, -r),
+                ( r, -r),
+                ( r,  r),
+                (-r,  r),
+            ]
+            return torch.tensor(pts, dtype=torch.float32, device=self.device)
 
+        elif shape == "diamond":
+            pts = [
+                ( 0.0, -r),
+                ( r,  0.0),
+                ( 0.0,  r),
+                (-r,  0.0),
+            ]
+            return torch.tensor(pts, dtype=torch.float32, device=self.device)
+
+        elif shape == "triangle":
+            pts = [
+                (0.0,  r),
+                (-0.866 * r, -0.5 * r),
+                ( 0.866 * r, -0.5 * r),
+            ]
+            return torch.tensor(pts, dtype=torch.float32, device=self.device)
+
+        elif shape == "circle":
+            theta = torch.linspace(
+                0.0, 2.0 * torch.pi, steps=n + 1, device=self.device
+            )[:-1]
+            return torch.stack(
+                (r * torch.cos(theta), r * torch.sin(theta)),
+                dim=1,
+            )
+
+        elif shape == "figure8":
+            theta = torch.linspace(
+                0.0, 2.0 * torch.pi, steps=n + 1, device=self.device
+            )[:-1]
+            x = r * torch.sin(theta)
+            y = 0.5 * r * torch.sin(2.0 * theta)
+            return torch.stack((x, y), dim=1)
+
+        elif shape == "custom":
+            return torch.tensor(
+                self.cfg.target_custom_xy,
+                dtype=torch.float32,
+                device=self.device,
+            )
+
+        else:
+            raise ValueError(f"Unsupported target_shape: {self.cfg.target_shape}")
 
     # Reset
     def _reset_idx(self, env_ids: torch.Tensor):
@@ -58,16 +110,19 @@ class BallBalanceDirectEnv(DirectRLEnv):
             self._servo_joint_pos_nominal_rad[env_ids]
         self._prev_servo_actions[env_ids] = 0.0
 
-        #reset to first target
-        self._current_target_idx[env_ids] = 0
+        # reset to random target
+        self._current_target_idx[env_ids] = torch.randint(
+            0, self._num_targets, (len(env_ids),), device=self.device
+        )
+        self._previous_target_idx[env_ids] = self._current_target_idx[env_ids]
         self._target_hold_counter[env_ids] = 0
+        self._prev_dist_to_target[env_ids] = 0.0
 
         # robot joints
         joint_pos = self.robot.data.default_joint_pos[env_ids].clone()
         joint_vel = self.robot.data.default_joint_vel[env_ids].clone()
 
-        joint_pos[:, self.servo_ids] = \
-            self._servo_joint_pos_nominal_rad[env_ids]
+        joint_pos[:, self.servo_ids] = self._servo_joint_pos_nominal_rad[env_ids]
         joint_vel[:, self.servo_ids] = 0.0
 
         self.robot.write_joint_state_to_sim(
@@ -108,6 +163,19 @@ class BallBalanceDirectEnv(DirectRLEnv):
             self.sim.step()
         self.scene.update(dt=self.cfg.sim.dt)
 
+        # initialize previous distance to target after reset
+        base_pos_w = self.robot.data.root_pos_w[env_ids]
+        base_quat_w = self.robot.data.root_quat_w[env_ids]
+        ball_pos_w = self.ball.data.root_pos_w[env_ids]
+
+        ball_pos_base = quat_apply_inverse(
+            base_quat_w, ball_pos_w - base_pos_w
+        )
+        ball_xy_base_m = ball_pos_base[:, 0:2]
+        current_targets_xy = self._targets_xy[self._current_target_idx[env_ids]]
+        target_error_xy_m = ball_xy_base_m - current_targets_xy
+        self._prev_dist_to_target[env_ids] = torch.norm(target_error_xy_m, dim=-1)
+
     # Stepping
     def _pre_physics_step(self, actions: torch.Tensor):
         self._prev_servo_actions[:] = (
@@ -117,13 +185,11 @@ class BallBalanceDirectEnv(DirectRLEnv):
         self.actions = torch.clamp(actions, -1.0, 1.0)
 
     def _apply_action(self):
-        # actions are per-servo offsets from nominal, scaled to radians
         servo_joint_pos_desired_rad = (
             self._servo_joint_pos_nominal_rad
             + self.actions * self.cfg.action_scale_rad
         )
 
-        # optional smoothing
         alpha = float(getattr(self.cfg, "action_smoothing", 0.0))
         self._servo_joint_pos_target_rad = (
             (1.0 - alpha) * servo_joint_pos_desired_rad
@@ -174,7 +240,7 @@ class BallBalanceDirectEnv(DirectRLEnv):
         )
         return {"policy": obs}
 
-    # Rewards (computed in base_link frame for sim-to-real consistency)
+    # Rewards
     def _get_rewards(self) -> torch.Tensor:
         base_pos_w = self.robot.data.root_pos_w
         base_quat_w = self.robot.data.root_quat_w
@@ -198,8 +264,46 @@ class BallBalanceDirectEnv(DirectRLEnv):
         dist_to_target_m = torch.norm(target_error_xy_m, dim=-1)
         speed_m_s = torch.norm(ball_vxy_base_m_s, dim=-1)
 
-        pos_reward = 1.0 / (1.0 + dist_to_target_m)
-        speed_reward = 1.0 / (1.0 + speed_m_s)
+        previous_targets_xy = self._targets_xy[self._previous_target_idx]
+        previous_target_error_xy_m = ball_xy_base_m - previous_targets_xy
+        dist_to_previous_target_m = torch.norm(previous_target_error_xy_m, dim=-1)
+
+        previous_is_different = (
+            self._current_target_idx != self._previous_target_idx
+        ).float()
+
+        linger_previous_penalty = self.cfg.linger_previous_penalty_scale * (
+            dist_to_previous_target_m < self.cfg.previous_target_linger_radius
+        ).float() * (dist_to_target_m > self.cfg.target_radius).float() * previous_is_different
+
+        pos_reward = 0.15 * torch.exp(-self.cfg.pos_reward_scale * dist_to_target_m)
+
+        progress_reward = self.cfg.progress_reward_scale * torch.clamp(
+            self._prev_dist_to_target - dist_to_target_m,
+            min=-0.002,
+            max=0.002,
+        )
+
+        dir_to_target = -target_error_xy_m / torch.clamp(
+            dist_to_target_m.unsqueeze(-1), min=1e-6
+        )
+        velocity_toward_target = torch.sum(ball_vxy_base_m_s * dir_to_target, dim=-1)
+
+        move_to_target_reward = self.cfg.move_to_target_reward_scale * torch.clamp(
+            velocity_toward_target, min=0.0
+        ) * (dist_to_target_m > self.cfg.target_radius).float()
+
+        settle_reward = self.cfg.settle_reward_scale * torch.exp(
+            -self.cfg.settle_speed_scale * speed_m_s
+        ) * (dist_to_target_m <= self.cfg.near_target_radius).float()
+
+        action_rate_penalty = self.cfg.action_rate_penalty_scale * torch.sum(
+            (self.actions - self._prev_servo_actions) ** 2, dim=-1
+        )
+
+        joint_vel_penalty = self.cfg.joint_vel_penalty_scale * torch.sum(
+            self.robot.data.joint_vel[:, self.servo_ids] ** 2, dim=-1
+        )
 
         target_reached = (
             (dist_to_target_m <= self.cfg.target_radius)
@@ -212,34 +316,64 @@ class BallBalanceDirectEnv(DirectRLEnv):
             torch.zeros_like(self._target_hold_counter),
         )
 
-        #For every env where the current target reaches required hold time,
-        #increment to next current target, and wrap back to start at end
         target_completed = self._target_hold_counter >= self.cfg.target_hold_steps
         completion_bonus = target_completed.float() * self.cfg.target_bonus
 
-        completed_env_ids = torch.nonzero(target_completed, as_tuple=False).squeeze(-1)
+        completed_env_ids = torch.nonzero(
+            target_completed, as_tuple=False
+        ).squeeze(-1)
+
         if completed_env_ids.numel() > 0:
+            self._previous_target_idx[completed_env_ids] = \
+                self._current_target_idx[completed_env_ids]
             self._current_target_idx[completed_env_ids] = (
                 self._current_target_idx[completed_env_ids] + 1
             ) % self._num_targets
+
             self._target_hold_counter[completed_env_ids] = 0
 
-        total_reward = pos_reward * speed_reward + completion_bonus
+            new_targets_xy = self._targets_xy[
+                self._current_target_idx[completed_env_ids]
+            ]
+            new_target_error_xy_m = ball_xy_base_m[completed_env_ids] - new_targets_xy
+            self._prev_dist_to_target[completed_env_ids] = torch.norm(
+                new_target_error_xy_m, dim=-1
+            )
+
+        total_reward = (
+            pos_reward
+            + progress_reward
+            + move_to_target_reward
+            + settle_reward
+            + completion_bonus
+            - action_rate_penalty
+            - joint_vel_penalty
+            - linger_previous_penalty
+        )
+
+        non_completed_mask = torch.ones(
+            self.num_envs, dtype=torch.bool, device=self.device
+        )
+        non_completed_mask[completed_env_ids] = False
+        self._prev_dist_to_target[non_completed_mask] = dist_to_target_m[non_completed_mask]
 
         if "log" not in self.extras:
             self.extras["log"] = {}
         self.extras["log"]["dist_to_target_m_mean"] = dist_to_target_m.mean()
         self.extras["log"]["speed_m_s_mean"] = speed_m_s.mean()
         self.extras["log"]["pos_reward_mean"] = pos_reward.mean()
-        self.extras["log"]["speed_reward_mean"] = speed_reward.mean()
+        self.extras["log"]["progress_reward_mean"] = progress_reward.mean()
+        self.extras["log"]["move_to_target_reward_mean"] = move_to_target_reward.mean()
+        self.extras["log"]["settle_reward_mean"] = settle_reward.mean()
         self.extras["log"]["completion_bonus_mean"] = completion_bonus.mean()
-        self.extras["log"]["current_target_idx_mean"] = \
-            self._current_target_idx.float().mean()
+        self.extras["log"]["action_rate_penalty_mean"] = action_rate_penalty.mean()
+        self.extras["log"]["joint_vel_penalty_mean"] = joint_vel_penalty.mean()
+        self.extras["log"]["current_target_idx_mean"] = self._current_target_idx.float().mean()
         self.extras["log"]["total_reward_mean"] = total_reward.mean()
 
         return total_reward
 
-    # Dones (computed in base_link frame)
+    # Dones
     def _get_dones(self) -> tuple[torch.Tensor, torch.Tensor]:
         base_pos_w = self.robot.data.root_pos_w
         base_quat_w = self.robot.data.root_quat_w
@@ -249,8 +383,7 @@ class BallBalanceDirectEnv(DirectRLEnv):
             base_quat_w, ball_pos_w - base_pos_w
         )
 
-        fail = torch.norm(ball_pos_base[:, 0:2], dim=-1) \
-            > self.cfg.ball_fail_radius
+        fail = torch.norm(ball_pos_base[:, 0:2], dim=-1) > self.cfg.ball_fail_radius
 
         time_out = self.episode_length_buf >= int(
             self.cfg.episode_length_s

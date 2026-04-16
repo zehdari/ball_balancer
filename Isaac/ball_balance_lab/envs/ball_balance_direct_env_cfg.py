@@ -8,6 +8,7 @@ from isaaclab.scene import InteractiveSceneCfg
 
 from ball_balance_lab.assets.ball_balancer_cfg import BALL_BALANCER_CFG
 
+
 @configclass
 class BallBalanceSceneCfg(InteractiveSceneCfg):
     # robot
@@ -17,7 +18,7 @@ class BallBalanceSceneCfg(InteractiveSceneCfg):
     ball = RigidObjectCfg(
         prim_path="/World/envs/env_.*/Ball",
         spawn=sim_utils.SphereCfg(
-            radius=0.020, # 40mm diameter ping pong ball
+            radius=0.020,  # 40mm diameter ping pong ball
 
             collision_props=sim_utils.CollisionPropertiesCfg(),
 
@@ -25,12 +26,12 @@ class BallBalanceSceneCfg(InteractiveSceneCfg):
                 kinematic_enabled=False,
                 disable_gravity=False,
                 solver_position_iteration_count=8,
-                solver_velocity_iteration_count=6, 
+                solver_velocity_iteration_count=6,
                 sleep_threshold=0.0,
                 stabilization_threshold=0.0,
             ),
 
-            mass_props=sim_utils.MassPropertiesCfg(mass=0.0027), # 2.7g ping pong ball
+            mass_props=sim_utils.MassPropertiesCfg(mass=0.0027),  # 2.7g ping pong ball
 
             physics_material=RigidBodyMaterialCfg(
                 static_friction=0.6,
@@ -45,14 +46,15 @@ class BallBalanceSceneCfg(InteractiveSceneCfg):
         prim_path="/World/envs/env_.*/Robot/ball_balancer_system/Table",
         spawn=None,
     )
-    
+
+
 @configclass
 class BallBalanceDirectEnvCfg(DirectRLEnvCfg):
     # --- env ---
-    decimation = 2 # apply actions every 2 sim steps
-    episode_length_s = 10.0
+    decimation = 2
+    episode_length_s = 20.0
     action_space = 3
-    observation_space = 10 # [q(3), qd(3), ball_pos_xy(2), ball_vel_xy(2)]
+    observation_space = 10  # [q(3), qd(3), ball_pos_xy_error_to_target(2), ball_vel_xy(2)]
     state_space = 0
     asymmetric_obs = False
     action_joint_gains = (20.0, 1.0, 5.0)
@@ -77,7 +79,9 @@ class BallBalanceDirectEnvCfg(DirectRLEnvCfg):
     )
 
     # --- robot ---
-    robot_cfg: ArticulationCfg = BALL_BALANCER_CFG.replace(prim_path="/World/envs/env_.*/Robot")
+    robot_cfg: ArticulationCfg = BALL_BALANCER_CFG.replace(
+        prim_path="/World/envs/env_.*/Robot"
+    )
 
     servo_joint_names = [
         "Servo_arm_1_revolute",
@@ -86,39 +90,61 @@ class BallBalanceDirectEnvCfg(DirectRLEnvCfg):
     ]
 
     # --- action scaling ---
-    action_scale_rad = 0.12 # map [-1,1] -> +/- this many radians around nominal
-    action_smoothing = 0.0
+    action_scale_rad = 0.12
+    action_smoothing = 0.40
 
     # --- reset randomization ---
-    reset_ball_xy_range = 0.03
-    reset_ball_height = 0.20
-    reset_ball_linvel = 0.1 
+    reset_ball_xy_range = 0.015
+    reset_ball_height = 0.14
+    reset_ball_linvel = 0.03
 
-    #target position tracking, set fixed vertices for square 
-    #clockwise ordered, repeatable path
-    square_targets_xy = (
+    # --- target path configuration ---
+    # options: "square", "triangle", "diamond", "circle", "figure8", "custom"
+    target_shape = "figure8"
+
+    # overall size of the path
+    target_radius_m = 0.05
+
+    # number of sampled points for smooth shapes like circle / figure8
+    target_num_points = 20
+
+    # used only when target_shape == "custom"
+    target_custom_xy = (
         (-0.03, -0.03),
         ( 0.03, -0.03),
         ( 0.03,  0.03),
         (-0.03,  0.03),
     )
-    #consider target "reached" when ball is close enough and moving slow enough
-    target_radius = 0.01
-    target_speed_tolerance = 0.04
 
-    #hold on target for several steps
+    # consider target "reached" when ball is close enough and moving slow enough
+    target_radius = 0.015
+    target_speed_tolerance = 0.06
+
+    # hold on target for several steps
     target_hold_steps = 4
-    target_bonus = 0.25
+    target_bonus = 30.0
 
+    # reward shaping
+    pos_reward_scale = 25.0
+    progress_reward_scale = 6.0
+    move_to_target_reward_scale = 3.5
+
+    near_target_radius = 0.020
+    settle_reward_scale = 0.25
+    settle_speed_scale = 18.0
+
+    previous_target_linger_radius = 0.020
+    linger_previous_penalty_scale = 0.75
+
+    action_rate_penalty_scale = 0.06
+    joint_vel_penalty_scale = 0.001
 
     # --- termination ---
-    # if ball goes too far from center in table frame
-    ball_fail_radius = 0.09
+    ball_fail_radius = 0.11
 
     scene: BallBalanceSceneCfg = BallBalanceSceneCfg(
-        num_envs=512,  # more parallel envs = stable gradient estimates
+        num_envs=2048,
         env_spacing=1.0,
         replicate_physics=True,
         clone_in_fabric=False,
     )
-

@@ -10,7 +10,7 @@ import subprocess
 # ============================================================
 # FLAGS - edit these
 # ============================================================
-ISAACLAB_TRAIN   = os.path.expanduser("/home/tburk/IsaacLab/scripts/reinforcement_learning/rl_games/train.py")
+ISAACLAB_TRAIN   = os.path.expanduser("~/IsaacLab/scripts/reinforcement_learning/rl_games/train.py")
 TASK             = "Isaac-BallBalance-BallBalancer-Direct"
 NUM_ENVS         = 2048
 SEED             = 42
